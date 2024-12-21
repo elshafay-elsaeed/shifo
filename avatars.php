@@ -1,79 +1,21 @@
-<?php
 
-// Enable errors for easy debugging.
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 
-// Configurable stuff.
-define('URL', 'http://search.twitter.com/search.json');
-define('SEARCH_PREFIX', '(ivegotmybluebeanieonnowwhat.com OR movethewebforward.com OR movethewebforward.org) AND ');
-define('RPP', 100);
-
-// Hashtags to search twitter for.
-$queries = array(
-  "#learn",
-  "#ask4help",
-  "#helpothers",
-  "#feedback",
-  "#explore",
-  "#write",
-  "#filebugs",
-  "#hack"
-);
-
-// Don't let random scallywags run this script.
-if ((isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] !== '127.0.0.1') || PHP_SAPI !== 'cli')
-  die('☹');
-
-// Search twitter, return full json_decode()'d response.
-function search($query, $page = 1) {
-  $url = URL . '?' . http_build_query(array(
-    'q' => SEARCH_PREFIX . $query,
-    'rpp' => RPP,
-    'page' => $page
-  ));
-
-  $ch = curl_init($url);
-  curl_setopt($ch, CURLOPT_NOBODY, 0);
-  curl_setopt($ch, CURLOPT_HEADER, 0);
-  curl_setopt($ch, CURLOPT_USERAGENT, 'movethewebforward.org');
-  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-  $response = curl_exec($ch);
-  $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-  curl_close($ch);
-
-  if ($status == 200) {
-    return json_decode($response);
-  }
-  else {
-    die("Twitter error: " . $status);
-  }
-}
-
-// Get all results for a query.
-function getAll($query) {
-  $page = 0;
-  $avatars = array();
-
-  do {
-    $results = search($query, ++$page);
-
-    foreach ($results->results as $result) {
-      $avatars[$result->from_user] = $result->profile_image_url;
-    }
-  }
-  while (count($results->results) == RPP);
-
-  return $avatars;
-}
-
-// Merge new avatars into our file of existing avatars.
-$avatars = json_decode(file_get_contents('avatars.json'));
-
-foreach ($queries as $query) {
-  $avatars->$query = array_merge((array)$avatars->$query, getAll($query));
-}
-
-file_put_contents('avatars.json', json_encode($avatars));
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/mvp.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/earlyaccess/notonaskharabic.css">
+    <title>index. html</title>
+    <style>
+        html, body {
+            font-family: 'Noto Naskh Arabic';
+            margin: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+<!DOCTYPE html> <html lang="ar" dir="rtl"> <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <link rel="stylesheet" href="https://unpkg.com/mvp.css"> <link rel="stylesheet" href="https://fonts.googleapis.com/earlyaccess/notonaskharabic.css"> <title>كود خصم</title> <style> html, body { font-family: 'Noto Naskh Arabic'; margin: 10px 20px; background-color: yellow; } .coupon { border: 5px dashed #bbb; width: 80%; margin: 0 auto; max-width: 600px; background-color: white; text-align: center; position: relative; padding: 20px; } .coupon h1 { margin: 0; padding: 10px; background-color: #f2f2f2; } .code { padding: 20px; font-size: 20px; background-color: #e0e0e0; margin-bottom: 10px; } .copy-btn { padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer; font-size: 16px; border: 3px solid yellow; } .copy-btn:hover { background-color: #45a049; } </style> </head> <body> <div class="coupon"> <h1>احصل على خصم 80%</h1> <div class="code" id="couponCode">E711</div> <button class="copy-btn" onclick="copyAndRedirect()">نسخ الكود والذهاب إلى الموقع</button> </div> <script> function copyAndRedirect() { var code = document.getElementById("couponCode").innerText; navigator.clipboard.writeText(code).then(function() { alert('تم نسخ الكود: ' + code); window.location.href = "https://www.noon.com/saudi-ar/"; }, function(err) { console.error('فشل النسخ: ', err); }); } </script> </body> </html>
+</body>
+</html>
